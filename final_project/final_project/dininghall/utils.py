@@ -134,42 +134,117 @@ import os
 from django.http import HttpResponse
 from datetime import datetime
 from docx import Document
-
 from io import BytesIO
 
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+from docx.shared import Cm
+
+
+def fetch_sessions_by_date_range(start_date, end_date):
+    sessions = table_session.objects.filter(date__range=[start_date, end_date])
+    return sessions
+    
 def download_report_doc(start_date, end_date, filename):
+    # Fetch session objects within the specified date range
+    sessions = table_session.objects.filter(date__range=[start_date, end_date])
+
+    # Calculate total available seats and seating capacity limit
+    total_available_seats = 0
+    seating_capacity_limit = 0
+
+    for session in sessions:
+        times = table_time.objects.filter(session_id=session)
+
+        for time_obj in times:
+            total_available_seats += time_obj.available_seat or time_obj.seat_limit
+            seating_capacity_limit += time_obj.seat_limit
+
+    # Calculate the percentage of seats occupied and seating capacity utilized
+    total_occupied_seats = seating_capacity_limit - total_available_seats
+    percentage_occupied = (total_occupied_seats / seating_capacity_limit) * 100
+    percentage_utilized = (total_available_seats / seating_capacity_limit) * 100
+
     # Generate the Word document in memory
     document = Document()
-    document.add_heading('Order Report', 0)
+    document.add_heading('Dining Hall Booking Report', level=1)
+
+    # Add report summary section
+    document.add_paragraph(f"Date Range: {start_date} to {end_date}")
+    report_summary_paragraph = document.add_paragraph()
+    report_summary_run = report_summary_paragraph.add_run("Report Summary:")
+    report_summary_run.bold = True
+    document.add_paragraph(f"Available Seats: {total_available_seats}")
+    document.add_paragraph(f"Seats Occupied: {percentage_occupied}%")
+    document.add_paragraph(f"Seating Capacity Limit: {seating_capacity_limit}")
+    document.add_paragraph(f"Capacity Utilization: {percentage_utilized}%")
+
+    # Add booking status analysis section
+    analysis_paragraph = document.add_paragraph()
+    analysis_run = analysis_paragraph.add_run("Analysis:")
+    analysis_run.bold = True
+    document.add_paragraph(f"The number of available seats during the specified time range is {total_available_seats}.")
+    document.add_paragraph(f"The percentage of seats occupied within the specified time range is {percentage_occupied}%.")
+    document.add_paragraph(f"The maximum seating capacity allowed at Dining Hall is {seating_capacity_limit}.")
+    document.add_paragraph(f"The percentage of seating capacity utilized within the specified time range is {percentage_utilized}%.")
+
+    # Add recommendations section
+    report_summary_paragraph = document.add_paragraph()
+    report_summary_run = report_summary_paragraph.add_run("Report Summary:")
+    report_summary_run.bold = True
+    document.add_paragraph("If the percentage of seats occupied is consistently high, consider increasing seating capacity or optimizing the booking system to accommodate more guests.")
+    document.add_paragraph("If the percentage of seating capacity utilized exceeds the limit, take measures to ensure compliance, such as managing bookings or implementing a waitlist system.")
+
+    # Add contact information
+    document.add_paragraph(f"For further assistance, please contact [Restaurant Contact Number] or visit [Restaurant Website/Email Address].")
+    document.add_paragraph("Thank you for choosing Dining Hall.")
+
+    document.add_page_break()  # Add a page break
+    document.add_heading("Booking Report's Table", level=1)
 
     headers = ["Date", "Name", "Time Range", "Available", "Limit", "Menu"]
     table = document.add_table(rows=1, cols=len(headers))
+    table.style = 'Table Grid'
     hdr_cells = table.rows[0].cells
     for i, header in enumerate(headers):
         hdr_cells[i].text = header
 
-    sessions = fetch_all_session_objects()
+    total_available = 0
+    total_limit = 0
+
     for session in sessions:
-        if start_date <= session.date <= end_date:
-            times = fetch_time_objects(session.id)
+        times = fetch_time_objects(session.id)
 
-            # Calculate start and end times for this session
-            start_time = min(time_obj.time for time_obj in times)
-            end_time = max(time_obj.time for time_obj in times)
-            time_range = f"{start_time} - {end_time}"
+        # Calculate start and end times for this session
+        start_time = min(time_obj.time for time_obj in times)
+        end_time = max(time_obj.time for time_obj in times)
+        time_range = f"{start_time} - {end_time}"
 
-            # Get other data for this session
-            date = session.date
-            name = session.get_name_display()
-            menu = session.menu
-            available = sum(time_obj.available_seat if time_obj.available_seat is not None else time_obj.seat_limit for time_obj in times)
-            limit = sum(time_obj.seat_limit for time_obj in times)
+        # Calculate available and limit seats for this session
+        available = sum(time_obj.available_seat or time_obj.seat_limit for time_obj in times)
+        limit = sum(time_obj.seat_limit for time_obj in times)
 
-            # Add row to table
-            row_data = [date, name, time_range, available, limit, menu]
-            row_cells = table.add_row().cells
-            for i, value in enumerate(row_data):
-                row_cells[i].text = str(value)
+        # Add row to table
+        row = table.add_row().cells
+        row[0].text = str(session.date)
+        row[1].text = session.get_name_display()
+        row[2].text = time_range
+        row[3].text = str(available)
+        row[4].text = str(limit)
+        row[5].text = session.menu
+
+        # Update the total counts
+        total_available += available
+        total_limit += limit
+
+    # Add a summary row for the total count
+    total_row = table.add_row().cells
+    total_row[0].text = "Total"
+    total_row[3].text = str(total_available)
+    total_row[4].text = str(total_limit)
 
     # Save the Word document to a BytesIO object
     file_data = BytesIO()
@@ -177,7 +252,7 @@ def download_report_doc(start_date, end_date, filename):
 
     # Set the response headers and content
     response = HttpResponse(file_data.getvalue(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Content-Disposition'] = f'attachment; filename="Booking_Report from {start_date} to {end_date}.docx"'
 
     return response
 
@@ -198,3 +273,60 @@ def validate_dates(start_date: str, end_date: str, date_format: str = '%Y-%m-%d'
         return False
     
 # DOWNLOAD REPORT FUNTIONS END #
+
+# ADD BAR CHART
+def add_bar_chart(document, sessions):
+    # Create a list of session labels and their corresponding available and limit values
+    session_labels = [str(session.date) for session in sessions]
+    available_values = [sum(time_obj.available_seat or time_obj.seat_limit for time_obj in fetch_time_objects(session.id)) for session in sessions]
+    limit_values = [sum(time_obj.seat_limit for time_obj in fetch_time_objects(session.id)) for session in sessions]
+
+    # Set the width of each bar
+    bar_width = 0.35
+    
+
+    # Set the positions of the x-axis ticks
+    x_pos = np.arange(len(session_labels))
+
+    # Create the figure and axes
+    fig, ax = plt.subplots()
+
+    # Create the bars for available and limit values
+    bar1 = ax.bar(x_pos, available_values, bar_width, label='Available')
+    bar2 = ax.bar(x_pos + bar_width, limit_values, bar_width, label='Limit')
+
+    # Set the labels, title, and ticks
+    ax.set_xlabel('Sessions')
+    ax.set_ylabel('Count')
+    ax.set_title('Session Availability Report')
+    ax.set_xticks(x_pos + bar_width / 2)
+    ax.set_xticklabels(session_labels)
+    ax.legend()
+
+    # Rotate the x-axis labels if needed
+    plt.xticks(rotation=35)
+
+    # Add labels to the top of each bar
+    def autolabel(bar):
+        for rect in bar:
+            height = rect.get_height()
+            ax.annotate('{}'.format(height), xy=(rect.get_x() + rect.get_width() / 2, height), xytext=(0, 3),
+                        textcoords="offset points", ha='center', va='bottom')
+
+    autolabel(bar1)
+    autolabel(bar2)
+
+    # Save the chart to a BytesIO object
+    chart_data = BytesIO()
+    plt.savefig(chart_data, format='png')
+    plt.close()
+
+    # Calculate the aspect ratio
+    image_width = Cm(15)  # Adjust the desired width of the image in centimeters
+    image_height = image_width * (chart_data.tell() / len(chart_data.getvalue()))
+
+    # Move the cursor to the end of the document
+    document.add_paragraph()
+
+    # Append the chart image to the document
+    document.add_picture(chart_data, width=image_width, height=image_height)
