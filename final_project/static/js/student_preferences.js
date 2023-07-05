@@ -28,11 +28,11 @@ $(function () {
 });
 function updateTimes() {
     var breakfastStart = 8;
-    var breakfastEnd = 9;
+    var breakfastEnd = 8;
     var lunchStart = 12;
-    var lunchEnd = 13;
+    var lunchEnd = 12;
     var dinnerStart = 18;
-    var dinnerEnd = 19;
+    var dinnerEnd = 18;
 
     var session = document.getElementById('sessionSelect').value;
     var startTimeSelect = document.getElementById('startTimeSelect');
