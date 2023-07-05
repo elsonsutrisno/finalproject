@@ -438,3 +438,12 @@ def delete_booking_and_update_available_seat_by_user_id(user_id, session_id):
         return f"Success Reservastion Cancelled, {session_id.name} for {session_id.date}", 'success'
     except Exception as e: 
         return f" {e} Failed: Reservation didn't cancelled", 'danger'
+
+
+
+# GET BOOKINGS START
+def get_bookings(request):
+    bookings = table_booking_dininghall.objects.filter(user_id=request.user.id)
+    context = {'bookings': bookings}
+    return context
+# GET BOOKINGS END

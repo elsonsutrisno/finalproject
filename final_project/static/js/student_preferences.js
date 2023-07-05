@@ -28,11 +28,11 @@ $(function () {
 });
 function updateTimes() {
     var breakfastStart = 8;
-    var breakfastEnd = 8;
+    var breakfastEnd = 8.5;
     var lunchStart = 12;
-    var lunchEnd = 12;
+    var lunchEnd = 13.5;
     var dinnerStart = 18;
-    var dinnerEnd = 18;
+    var dinnerEnd = 19.5;
 
     var session = document.getElementById('sessionSelect').value;
     var startTimeSelect = document.getElementById('startTimeSelect');
@@ -57,7 +57,7 @@ function updateTimes() {
             option1.value = i + ':00';
             option1.textContent = i + ':00 AM';
             endTimeSelect.appendChild(option1);
-            if (i < breakfastEnd + 1) {
+            if (i < breakfastEnd) {
                 var option2 = document.createElement('option');
                 option2.value = i + ':30';
                 option2.textContent = i + ':30 AM';
@@ -90,7 +90,7 @@ function updateTimes() {
             option1.textContent = hour + ':00 ' + (i < 12 ? 'AM' : 'PM');
             endTimeSelect.appendChild(option1);
 
-            if (i < lunchEnd + 1) {
+            if (i < lunchEnd) {
                 option2.value = i + ':30';
                 option2.textContent = hour + ':30 ' + (i < 12 ? 'AM' : 'PM');
                 endTimeSelect.appendChild(option2);
@@ -115,7 +115,7 @@ function updateTimes() {
             option1.value = i + ':00';
             option1.textContent = (i - 12) + ':00 PM';
             endTimeSelect.appendChild(option1);
-            if (i < dinnerEnd + 1) {
+            if (i < dinnerEnd) {
                 var option2 = document.createElement('option');
                 option2.value = i + ':30';
                 option2.textContent = (i - 12) + ':30 PM';
