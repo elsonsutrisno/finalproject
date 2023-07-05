@@ -237,6 +237,7 @@ def confirm(request):
 @student_required
 def show_bookings(request):
     context = get_bookings(request=request)
+    context['email'] = request.user.email
     return render(request, 'students/bookings_page.html', context)
 
 @student_required
@@ -252,7 +253,6 @@ def delete_booking(request, booking_id):
     booking.delete()
     return redirect('show_bookings')
 # End Booking Table
-
 
 def not_student(request):
     messages.error(request, 'You are not authorized to access student resources. You need the Student role.')
