@@ -42,7 +42,7 @@ def student_menu_view(request):
 
 @student_required
 def students_home_view_dininghall(request):
-    context = get_student_dininghall_context(request)
+    context = get_dininghall_reservation_page_context(request)
     context['email'] = request.user.email
     return render(request, 'students/student_dininghall_view.html', context)
 
@@ -71,7 +71,8 @@ def confirm_action(request, current_hour, current_date, session_name, time_objec
             'session': session_name,
             'date': current_date,
             'current_hour': current_hour,
-            'can_booking': True
+            'can_booking': True,
+            'email': request.user.email,
         }
         return render(request, 'students/student_preferences.html', context)
     if is_seat_full(session_id=session_object, date=current_date, time=time_suggested):

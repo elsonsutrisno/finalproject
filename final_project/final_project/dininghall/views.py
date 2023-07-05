@@ -142,7 +142,6 @@ def upload_menu_file(request):
                             time(7, 30),
                             time(8, 0),
                             time(8, 30),
-                            time(9, 0),
                         ]
                     elif session.name == "Lunch":
                         times = [

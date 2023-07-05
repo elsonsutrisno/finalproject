@@ -27,9 +27,9 @@ def is_session_id_in_booking_table(session_id):
 
 def is_within_restricted_range(booked_suggestion_time, current_hour):
     return (
-        (time(7, 0, 0) <= booked_suggestion_time <= time(9, 0, 0) and current_hour <= time(9, 0, 0) or current_hour > time(19, 0, 0))
+        (time(7, 0, 0) <= booked_suggestion_time <= time(9, 0, 0) and current_hour <= time(7, 0, 0) or current_hour > time(19, 30, 0))
         or (time(11, 0, 0) <= booked_suggestion_time <= time(14, 0, 0) and current_hour <= time(14, 0, 0))
-        or (time(17, 0, 0) <= booked_suggestion_time <= time(19, 0, 0) and current_hour <= time(19, 0, 0))
+        or (time(17, 0, 0) <= booked_suggestion_time <= time(19, 30, 0) and current_hour <= time(19, 30, 0))
     )
 
 def is_between(time, time_range):
@@ -296,7 +296,11 @@ def get_start_end_for_algorithm(email, day, session_times):
 
     # start = class_list_by_email[0].class_start_time
     # end = class_list_by_email[0].class_end_time
-    start, end = list(session_times.keys())[0], list(session_times.keys())[-1]
+    # start, end = list(session_times.keys())[0], list(session_times.keys())[-1]
+    start = min(session_times, key=session_times.get)
+    end = max(session_times, key=session_times.get)
+    
+    print("Session Times",session_times)
 
     return start, end, session_times
 
@@ -312,6 +316,39 @@ def get_student_dininghall_context(request):
 
     latest_booking = get_latest_booking(user_id=request.user, current_date=current_date, session_name=session)
     print(latest_booking)
+    if latest_booking:
+        context = get_context_from_latest_booking(latest_booking, current_hour, current_date)
+        print("LATEST BOOKING CALLED")
+        if context:
+            return context
+
+    context = {
+        'email': request.user.email,
+        'time_objects': time_objects,
+        'session_id': session_id,
+        'time_suggested': suggestion_time,
+        'session': session,
+        'date': current_date,
+        'day': current_date.strftime('%A'),
+        'can_booking': True,
+        'current_session' : session.upper(),
+    }
+    return context
+
+def get_dininghall_reservation_page_context(request):
+    current_hour, current_date = get_current_hour_and_current_date()
+    session, time_objects = get_session_and_time_objects(current_hour)
+    
+    session_id = get_session_id(current_date, session)
+    if session_id:
+        suggestion_time = get_suggestion_time(session_id, request.user.email, current_date)
+    else:
+        suggestion_time = None
+
+    latest_booking = get_latest_booking(user_id=request.user, current_date=current_date, session_name=session)
+    print("Latest Booking", latest_booking)
+    print("Suggestion Time", suggestion_time)
+    print("Session:::", session_id)
     if latest_booking:
         context = get_context_from_latest_booking(latest_booking, current_hour, current_date)
         print("LATEST BOOKING CALLED")
@@ -344,6 +381,7 @@ def get_student_dininghall_context(request):
         'dinner': dinner,
     }
     return context
+
 
 def get_suggestion_time(session_object, email, current_date):
     session_info = get_session_time_and_seat(session_object)

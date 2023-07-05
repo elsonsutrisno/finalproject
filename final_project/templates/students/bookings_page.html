@@ -16,187 +16,228 @@
 </div>
 {% endblock %}
 
-
-<!-- <h1>Bookings</h1>
-<table>
-    <tr>
-        <th>User</th>
-        <th>Session</th>
-        <th>Recommended Time</th>
-        <th>Created at</th>
-        <th>Action</th>
-    </tr>
-    {% for booking in bookings %}
-        <tr>
-            <td>{{ booking.user_id }}</td>
-            <td>{{ booking.session_id.name }}</td>
-            <td>{{ booking.recommended_time }}</td>
-            <td>{{ booking.created_at }}</td>
-            <td>
-                <form action="{% url 'delete_booking' booking.id %}" method="POST">
-                    {% csrf_token %}
-                    <input type="submit" value="Delete">
-                </form>
-            </td>
-        </tr>
-    {% endfor %}
-</table> -->
-
 {% block styles %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'styles/styles_dininghall_index.css' %}">
 <style>
-    /* Center the search bar */
-    #searchInput {
-        display: block;
+    .container {
+        max-width: 100%;
         margin: 0 auto;
-        width: 70vw;
-        margin-bottom: 3rem;
+        padding: 20px;
     }
 
-    /* Center the pagination controls */
-    #pagination {
-        text-align: center;
+    .table-container {
+        overflow-y: scroll;
+        scrollbar-width: thin;
+        scrollbar-color: #999999 #f2f2f2;
+    }
+
+    .table-container::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .table-container::-webkit-scrollbar-track {
+        background: #f2f2f2;
+    }
+
+    .table-container::-webkit-scrollbar-thumb {
+        background-color: #999999;
+        border-radius: 5px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        color: #333;
+    }
+
+    @media screen and (max-width: 600px) {
+        table {
+            display: block;
+            overflow-x: auto;
+            overflow-y: scroll;
+
+        }
+
+        th,
+        td {
+            white-space: nowrap;
+        }
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .pagination button {
+        margin: 0 5px;
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        background-color: #f2f2f2;
+        color: #333;
+        cursor: pointer;
+    }
+
+    .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .search-bar {
+        margin-bottom: 20px;
+    }
+
+    .search-bar input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    /* Styles for the delete button */
+    .delete-button {
+        padding: 8px 16px;
+        background-color: #f44336;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .delete-button:hover {
+        background-color: #d32f2f;
+    }
+
+    .delete-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px #ff5722;
     }
 </style>
 {% endblock %}
 
-
-
 {% block template %}
-    <div class="container">
-        <h2>Bookings</h2>
-        <input type="text" id="searchInput" placeholder="Search Bookings Here...">
-        <ul class="responsive-table">
-            <li class="table-header">
-                <div class="col col-1">User</div>
-                <div class="col col-2">Session</div>
-                <div class="col col-3">Recommended Time</div>
-                <div class="col col-4">Created at</div>
-                <div class="col col-5">Action</div>
-            </li>
-            {% for booking in bookings %}
-                <li class="table-row"
-                    data-search="{{ booking.user_id }} {{ booking.session_id.name }} {{ booking.recommended_time }} {{ booking.created_at }}">
-                    <div class="col col-1">{{ booking.user_id }}</div>
-                    <div class="col col-2">{{ booking.session_id.name }}</div>
-                    <div class="col col-3">{{ booking.recommended_time }}</div>
-                    <div class="col col-4">{{ booking.created_at }}</div>
-                    <div class="col col-5">
-                        <form action="{% url 'delete_booking' booking.id %}" method="POST">
-                            {% csrf_token %}
-                            <input type="submit" value="Delete">
-                        </form>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-
-        <!-- Add pagination controls below the table -->
-        <div id="pagination">
-            <button id="prevBtn" disabled>Prev</button>
-            <span id="pageInfo"></span>
-            <button id="nextBtn">Next</button>
+<div class="container">
+    <h2>Bookings</h2>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search Bookings Here..." onkeyup="searchBookings()">
+    </div>
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="responsive-table">
+                <thead>
+                    <tr class="table-header">
+                        <th>User</th>
+                        <th>Session</th>
+                        <th>Recommended Time</th>
+                        <th>Created at</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr class="table-row">
+                        <td>{{ booking.user_id }}</td>
+                        <td>{{ booking.session_id.name }}</td>
+                        <td>{{ booking.recommended_time }}</td>
+                        <td>{{ booking.created_at }}</td>
+                        <td>
+                            <form action="{% url 'delete_booking' booking.id %}" method="POST">
+                                {% csrf_token %}
+                                <input class="delete-button" type="submit" value="Delete">
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <!-- Add your custom JavaScript code here -->
+</div>
+<div class="pagination">
+    <button id="previousButton" onclick="paginate('previous')">Previous</button>
+    <button id="nextButton" onclick="paginate('next')">Next</button>
+</div>
 {% endblock %}
 
 {% block script %}
 <script>
-    // Function to toggle the display of time objects when "Show More" button is clicked
-    function toggleTimeObjects(event) {
-        var wrapper = event.target.closest(".table-row");
-        var timeObjectsContainer = wrapper.querySelector(".time-objects-container");
-        wrapper.classList.toggle("show-time-objects");
+    // Client-side pagination functionality
+    let currentPage = 1;
+    const itemsPerPage = 3;
+    const rows = document.querySelectorAll('.table-row');
+    const previousButton = document.getElementById('previousButton');
+    const nextButton = document.getElementById('nextButton');
+
+    function paginate(direction) {
+        const totalPages = Math.ceil(rows.length / itemsPerPage);
+
+        if (direction === 'previous') {
+            currentPage = Math.max(currentPage - 1, 1);
+        } else if (direction === 'next') {
+            currentPage = Math.min(currentPage + 1, totalPages);
+        }
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+
+        rows.forEach((row, index) => {
+            if (index >= startIndex && index < endIndex) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        updatePaginationButtons();
     }
 
-    // Add event listeners to "Show More" buttons
-    var showMoreButtons = document.getElementsByClassName("show-more-btn");
-    for (var i = 0; i < showMoreButtons.length; i++) {
-        var button = showMoreButtons[i];
-        button.addEventListener("click", toggleTimeObjects);
+    function updatePaginationButtons() {
+        previousButton.disabled = currentPage === 1;
+        nextButton.dis
+        abled = currentPage === Math.ceil(rows.length / itemsPerPage);
     }
 </script>
 <script>
-    // Get the input field and the table
-    var input = document.getElementById("searchInput");
-    var table = document.querySelector(".responsive-table");
+    function searchBookings() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const rows = document.getElementsByClassName('table-row');
 
-    // Get the pagination controls
-    var prevBtn = document.getElementById("prevBtn");
-    var nextBtn = document.getElementById("nextBtn");
-    var pageInfo = document.getElementById("pageInfo");
+        Array.from(rows).forEach(row => {
+            const columns = row.getElementsByTagName('td');
+            let match = false;
 
-    // Set the number of rows to display per page
-    var rowsPerPage = 3;
+            Array.from(columns).forEach(column => {
+                const text = column.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    match = true;
+                }
+            });
 
-    // Set the initial current page to 1
-    var currentPage = 1;
-
-    // Add event listeners to the prev and next buttons
-    prevBtn.addEventListener("click", function () {
-        currentPage--;
-        showPage();
-    });
-    nextBtn.addEventListener("click", function () {
-        currentPage++;
-        showPage();
-    });
-
-    // Function to show the current page of rows
-    function showPage() {
-        // Get all the rows in the table
-        var rows = table.querySelectorAll(".table-row");
-
-        // Filter the rows based on the search query
-        var filter = input.value.toUpperCase();
-        var filteredRows = [];
-        for (var i = 0; i < rows.length; i++) {
-            var txtValue = rows[i].getAttribute("data-search");
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                filteredRows.push(rows[i]);
+            if (match) {
+                row.style.display = '';
             } else {
-                rows[i].style.display = "none";
+                row.style.display = 'none';
             }
-        }
-
-        // Calculate the start and end index of the rows to display
-        var startIndex = (currentPage - 1) * rowsPerPage;
-        var endIndex = startIndex + rowsPerPage;
-
-        // Loop through all the filtered rows and hide those that are not on the current page
-        for (var i = 0; i < filteredRows.length; i++) {
-            if (i >= startIndex && i < endIndex) {
-                filteredRows[i].style.display = "";
-            } else {
-                filteredRows[i].style.display = "none";
-            }
-        }
-
-        // Update the pageInfo text
-        pageInfo.textContent = "Page " + currentPage;
-
-        // Enable or disable the prev and next buttons
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = endIndex >= filteredRows.length;
+        });
     }
-
-    // Add an event listener to the input field to listen for changes
-    input.addEventListener("keyup", function () {
-        // Reset the pagination when the search query changes
-        currentPage = 1;
-        showPage();
-    });
-
-    // Show the initial page
-    showPage();
 </script>
 
-<script>
-    $(document).ready(function() {
-        $('.alert').delay(3000).fadeOut(300);
-    });
-</script>
+
+
 {% endblock %}
