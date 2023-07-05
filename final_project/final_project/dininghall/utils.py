@@ -136,14 +136,6 @@ from datetime import datetime
 from docx import Document
 from io import BytesIO
 
-
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import numpy as np
-from docx.shared import Cm
-
-
 def fetch_sessions_by_date_range(start_date, end_date):
     sessions = table_session.objects.filter(date__range=[start_date, end_date])
     return sessions
@@ -273,60 +265,3 @@ def validate_dates(start_date: str, end_date: str, date_format: str = '%Y-%m-%d'
         return False
     
 # DOWNLOAD REPORT FUNTIONS END #
-
-# ADD BAR CHART
-def add_bar_chart(document, sessions):
-    # Create a list of session labels and their corresponding available and limit values
-    session_labels = [str(session.date) for session in sessions]
-    available_values = [sum(time_obj.available_seat or time_obj.seat_limit for time_obj in fetch_time_objects(session.id)) for session in sessions]
-    limit_values = [sum(time_obj.seat_limit for time_obj in fetch_time_objects(session.id)) for session in sessions]
-
-    # Set the width of each bar
-    bar_width = 0.35
-    
-
-    # Set the positions of the x-axis ticks
-    x_pos = np.arange(len(session_labels))
-
-    # Create the figure and axes
-    fig, ax = plt.subplots()
-
-    # Create the bars for available and limit values
-    bar1 = ax.bar(x_pos, available_values, bar_width, label='Available')
-    bar2 = ax.bar(x_pos + bar_width, limit_values, bar_width, label='Limit')
-
-    # Set the labels, title, and ticks
-    ax.set_xlabel('Sessions')
-    ax.set_ylabel('Count')
-    ax.set_title('Session Availability Report')
-    ax.set_xticks(x_pos + bar_width / 2)
-    ax.set_xticklabels(session_labels)
-    ax.legend()
-
-    # Rotate the x-axis labels if needed
-    plt.xticks(rotation=35)
-
-    # Add labels to the top of each bar
-    def autolabel(bar):
-        for rect in bar:
-            height = rect.get_height()
-            ax.annotate('{}'.format(height), xy=(rect.get_x() + rect.get_width() / 2, height), xytext=(0, 3),
-                        textcoords="offset points", ha='center', va='bottom')
-
-    autolabel(bar1)
-    autolabel(bar2)
-
-    # Save the chart to a BytesIO object
-    chart_data = BytesIO()
-    plt.savefig(chart_data, format='png')
-    plt.close()
-
-    # Calculate the aspect ratio
-    image_width = Cm(15)  # Adjust the desired width of the image in centimeters
-    image_height = image_width * (chart_data.tell() / len(chart_data.getvalue()))
-
-    # Move the cursor to the end of the document
-    document.add_paragraph()
-
-    # Append the chart image to the document
-    document.add_picture(chart_data, width=image_width, height=image_height)
