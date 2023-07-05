@@ -25,7 +25,7 @@ def sas_index(request):
 @user_passes_test(check_sas_role, login_url='not_sas')
 def import_user(request):
     if request.method != 'POST':
-        context = {'email':request.user.email,}
+        context = {'email': request.user.email}
         return render(request, 'sas/import_user.html', context=context)
 
     excel_file = request.FILES['excel_file']
@@ -35,10 +35,19 @@ def import_user(request):
         return render(request, 'sas/import_user.html')
 
     new_users, existing_users = process_excel_file(excel_file)
-    update_database(new_users, existing_users)
+
+    # Import users in batches of 5
+    batch_size = 5
+    for i in range(0, len(new_users), batch_size):
+        batch_new_users = new_users[i:i + batch_size]
+        batch_existing_users = existing_users[i:i + batch_size]
+        update_database(batch_new_users, batch_existing_users)
+        
 
     messages.success(request, 'Users imported successfully.', extra_tags='success')
     return redirect('sas_index')
+
+
 
 @login_required(login_url='login')
 @user_passes_test(check_sas_role, login_url='not_sas')

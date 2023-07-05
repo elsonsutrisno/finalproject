@@ -22,7 +22,7 @@ def process_excel_file(excel_file):
     # Fetch all existing users from the database and store them in a dictionary
     existing_users_dict = {user.email: user for user in CustomUser.objects.all()}
 
-    for row in worksheet.iter_rows(min_row=2, values_only=True):
+    for i, row in enumerate(worksheet.iter_rows(min_row=2, values_only=True), start=1):
         user_id, name, email, role = row
         print(f"User {user_id} checked")
 
@@ -47,7 +47,19 @@ def process_excel_file(excel_file):
             )
             new_users.append(new_user)
 
+        # Check if 5 users have been processed or if it's the last row
+        if i % 5 == 0 or i == worksheet.max_row - 1:
+            if i % 5 == 0:
+                print(f'{i % 5} users processed.')
+            # Update the database for the processed users
+            update_database(new_users, existing_users)
+
+            # Clear the lists for the next batch
+            new_users = []
+            existing_users = []
+
     return new_users, existing_users
+
 
 
 def update_database(new_users, existing_users):
