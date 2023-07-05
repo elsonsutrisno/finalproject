@@ -27,9 +27,9 @@ def is_session_id_in_booking_table(session_id):
 
 def is_within_restricted_range(booked_suggestion_time, current_hour):
     return (
-        (time(7, 0, 0) <= booked_suggestion_time <= time(8, 59, 59) and current_hour < time(9, 0, 0) or current_hour > time(19, 0, 0))
-        or (time(11, 0, 0) <= booked_suggestion_time <= time(13, 59, 59) and current_hour < time(14, 0, 0))
-        or (time(17, 0, 0) <= booked_suggestion_time <= time(18, 59, 59) and current_hour < time(19, 0, 0))
+        (time(7, 0, 0) <= booked_suggestion_time <= time(8, 59, 59) and current_hour <= time(9, 0, 0) or current_hour > time(19, 0, 0))
+        or (time(11, 0, 0) <= booked_suggestion_time <= time(13, 59, 59) and current_hour <= time(13, 30, 0))
+        or (time(17, 0, 0) <= booked_suggestion_time <= time(18, 59, 59) and current_hour <= time(19, 0, 0))
     )
 
 def is_between(time, time_range):
