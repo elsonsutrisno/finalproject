@@ -77,7 +77,10 @@ def confirm_action(request, current_hour, current_date, session_name, time_objec
         return render(request, 'students/student_preferences.html', context)
     if is_booked_by_user_date_session(request.user.id, current_date, session_name):
         messages.success(request, f"You already booked {session_name} for {current_date}.", extra_tags="danger")
-        return redirect('student_index')
+        latest_booking = get_latest_booking(user_id=request.user, current_date=current_date, session_name=session_name)
+        if latest_booking:
+            context = get_context_from_latest_booking(latest_booking, current_hour, current_date)
+        return render("students/student_dininghall_view.html", context )
 
     if is_seat_full(session_id=session_object, date=current_date, time=time_suggested):
         messages.success(request, f"Apologies, but {session_object.name} on {session_object.date} at {time_suggested} is already full.", extra_tags="warning")
