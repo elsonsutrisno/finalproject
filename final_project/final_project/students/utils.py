@@ -316,10 +316,8 @@ def get_student_dininghall_context(request):
         suggestion_time = None
 
     latest_booking = get_latest_booking(user_id=request.user, current_date=current_date, session_name=session)
-    print(latest_booking)
     if latest_booking:
         context = get_context_from_latest_booking(latest_booking, current_hour, current_date)
-        print("LATEST BOOKING CALLED")
         if context:
             return context
 
@@ -347,12 +345,8 @@ def get_dininghall_reservation_page_context(request):
         suggestion_time = None
 
     latest_booking = get_latest_booking(user_id=request.user, current_date=current_date, session_name=session)
-    print("Latest Booking", latest_booking)
-    print("Suggestion Time", suggestion_time)
-    print("Session:::", session_id)
     if latest_booking:
         context = get_context_from_latest_booking(latest_booking, current_hour, current_date)
-        print("LATEST BOOKING CALLED")
         if context:
             return context
     
