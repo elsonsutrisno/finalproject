@@ -227,7 +227,7 @@ def get_menu_b_l_d(menus):
 def get_session_and_time_objects(current_hour):
     if time(20, 0) <= current_hour <= time(23, 59, 59) or time(0, 0) <= current_hour <= time(9, 59):
         session = "Breakfast"
-        time_objects = table_time.objects.filter(time__gte=time(7, 0, 0), time__lte=time(9, 30, 0))
+        time_objects = table_time.objects.filter(time__gte=time(7, 0, 0), time__lte=time(9, 0, 0))
     elif time(10, 0) <= current_hour <= time(13, 59):
         session = "Lunch"
         time_objects = table_time.objects.filter(time__gte=time(11, 0, 0), time__lte=time(13, 30, 0))
@@ -338,7 +338,7 @@ def get_dininghall_reservation_page_context(request):
     current_hour, current_date = get_current_hour_and_current_date()
     session, time_objects = get_session_and_time_objects(current_hour)
     
-    session_id = get_session_id(current_date, session)
+    session_id = get_session_id(date=current_date, name=session)
     if session_id:
         suggestion_time = get_suggestion_time(session_id, request.user.email, current_date)
     else:

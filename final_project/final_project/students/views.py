@@ -43,13 +43,9 @@ def student_menu_view(request):
 @student_required
 def students_home_view_dininghall(request):
     if request.method == 'GET':
-        time_ordered, session = get_order_time(request.user.id)
-        context = get_student_dininghall_context(request)
-        context['fullname'] =  request.user.name
-        context['time_suggested'] : time_ordered
-        context['session'] : session
+        context = get_dininghall_reservation_page_context(request)
         context['email'] = request.user.email
-        return render(request, "students/student_dininghall_view.html", context )
+        return render(request, 'students/student_dininghall_view.html', context)
     if request.method == 'POST':
         context = get_dininghall_reservation_page_context(request)
         context['email'] = request.user.email
