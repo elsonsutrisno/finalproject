@@ -79,6 +79,15 @@ def get_current_hour_and_current_date():
     if time(17, 0, 0) <= current_hour <= time(23, 59, 59):
         current_hour = time(7, 0, 0)
         current_date += timedelta(days=1)
+
+    if time(8, 30, 0) <= current_hour <= time(14, 0, 0):
+        current_hour = time(11, 0, 0)
+        current_date += timedelta(days=1)
+
+    if time(11, 0, 0) <= current_hour <= time(17, 0, 0):
+        current_hour = time(17, 0, 0)
+        current_date += timedelta(days=1)
+
     return current_hour, current_date
 
 def get_latest_booking_for_menu(session_object):
