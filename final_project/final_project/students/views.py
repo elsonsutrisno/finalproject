@@ -105,6 +105,7 @@ def confirm_action(request, current_hour, current_date, session_name, time_objec
                         extra_tags="success")
         context = get_student_dininghall_context(request=request)
         context['can_booking'] = False
+        context['email'] = request.user.email
         return render(request=request, template_name= "students/student_dininghall_view.html", context=context)
         return redirect('student_index' ) 
         
@@ -241,7 +242,8 @@ def confirm(request):
         else:
             print("Confirm Data Not Valid")
             messages.success(request, "Oops! Invalid input. Please retry.", extra_tags="danger")
-            return render(request, "students/student_preferences.html")
+            context = {'email' : request.user.email}
+            return render(request, "students/student_preferences.html", context=context)
     else:
         messages.success(request, "Send Some POST data", extra_tags="danger")    
         return redirect("student_index")
