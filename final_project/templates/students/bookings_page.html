@@ -16,6 +16,14 @@
 </div>
 {% endblock %}
 
+<!-- Navbar Start -->
+{% block navbar %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'student_index' %}">Home</a>
+</li>
+{% endblock %}
+<!-- Navbar End -->
+
 {% block styles %}
 {% load static %}
 <style>

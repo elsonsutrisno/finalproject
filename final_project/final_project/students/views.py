@@ -80,7 +80,7 @@ def confirm_action(request, current_hour, current_date, session_name, time_objec
         latest_booking = get_latest_booking(user_id=request.user, current_date=current_date, session_name=session_name)
         if latest_booking:
             context = get_context_from_latest_booking(latest_booking, current_hour, current_date)
-            print(context)
+            context['email'] = request.user.email
         return render(request, "students/student_dininghall_view.html", context)
 
     if is_seat_full(session_id=session_object, date=current_date, time=time_suggested):
