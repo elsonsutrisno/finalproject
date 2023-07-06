@@ -27,7 +27,7 @@ def is_session_id_in_booking_table(session_id):
 
 def is_within_restricted_range(booked_suggestion_time, current_hour):
     return (
-        (time(7, 0, 0) <= booked_suggestion_time <= time(9, 0, 0) and current_hour <= time(7, 0, 0) or current_hour > time(19, 30, 0))
+        (time(7, 0, 0) <= booked_suggestion_time <= time(9, 0, 0) and current_hour <= time(9, 0, 0) or current_hour > time(19, 30, 0))
         or (time(11, 0, 0) <= booked_suggestion_time <= time(14, 0, 0) and current_hour <= time(14, 0, 0))
         or (time(17, 0, 0) <= booked_suggestion_time <= time(19, 30, 0) and current_hour <= time(19, 30, 0))
     )
@@ -90,7 +90,8 @@ def get_latest_booking(user_id, current_date, session_name):
     if type(current_date) != str:
         current_date = str(current_date)
 
-    user_id = user_id.id
+    if user_id != int: 
+        user_id = user_id.id
     print(type(user_id), type(current_date), type(session_name))
     print(user_id, current_date, session_name)   
 
