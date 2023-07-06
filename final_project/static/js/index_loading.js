@@ -1,9 +1,7 @@
 
 let counter = 0;
 let loadingTexts = [
-    "Reserving your table... 🍽️",
-    "Preparing your spot... 🍴",
-    "Bon appétit! 🥂"
+    "Checking Availability 🍽️",
 ];
 
 let interval;
@@ -34,12 +32,10 @@ function changeText() {
 function submitForm(event) {
     event.preventDefault(); // prevent default form submission
     let loadingTexts = [
-        "Reserving your table... 🍽️",
-        "Preparing your spot... 🍴",
-        "Bon appétit! 🥂"
+        "Checking Availability 🍽️",
     ];
     showLoading();
     setTimeout(() => {
         document.getElementById("myForm").submit(); // manually submit the form
-    }, 5000); // manually submit the form
+    }, 3000); // manually submit the form
 }
